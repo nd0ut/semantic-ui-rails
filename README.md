@@ -1,4 +1,4 @@
-# Semantic U
+# Semantic UI
 UI is the vocabulary of the web.
 
 Semantic empowers designers and developers by creating a language for sharing UI.
