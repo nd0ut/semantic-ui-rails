@@ -7,10 +7,11 @@ require 'json'
 class Semantic < Thor
   include Thor::Actions
 
-
   REPO_URI = "https://github.com/jlukic/Semantic-UI.git"
 
   desc "update", "fetch Semantic UI code from git"
+  method_option :branch, default: "master"
+
   def update
     if File.directory? working_dir
       say_status "MESSAGE", "WORKING DIR EXIST"
@@ -23,6 +24,7 @@ class Semantic < Thor
 
     parse_version
     copy_files
+    generate_templates
   end
 
   no_commands do
@@ -57,7 +59,7 @@ class Semantic < Thor
 
       # STYLESHEETS
       stylesheets_path = "vendor/assets/stylesheets/semantic-ui/"
-      run "rsync -avm --include='*.less' -f 'hide,! */' #{git_root + 'src/'} #{source_root + stylesheets_path}"
+      run "rsync -avm --include='*.less' --include='*.css' -f 'hide,! */' #{git_root + 'src/'} #{source_root + stylesheets_path}"
 
       # JAVASCRIPTS
       javascripts_path = "vendor/assets/javascripts/semantic-ui/"
@@ -70,6 +72,52 @@ class Semantic < Thor
       # IMAGES
       images_path = "vendor/assets/images/semantic-ui/"
       run "rsync -avm --include='*.*' -f 'hide,! */' #{git_root + 'src/images/'} #{source_root + images_path}"
+    end
+
+    def generate_templates
+      # JAVASCRIPTS
+      say_status "STEP", "GENERATE JAVASCRIPT TEMPLATE"
+      js_template_path = source_root + "lib/generators/semantic/install/templates/semantic-ui.js"
+
+      javascripts_path = Pathname.new(source_root + "vendor/assets/javascripts/semantic-ui")
+
+      FileUtils.rm js_template_path
+
+      File.open(js_template_path, 'a') do |template|
+        Dir.glob(source_root + javascripts_path + "**/*") do |file|
+          next if File.directory? file
+
+          filepath = Pathname.new(file)
+
+          relative_path = filepath.relative_path_from(javascripts_path)
+
+          template.write "//= require semantic-ui/#{relative_path} \n"
+        end
+      end
+
+      # STYLESHEETS
+      say_status "STEP", "GENERATE STYLESHEETS TEMPLATES"
+      css_template_path = source_root + "lib/generators/semantic/install/templates/semantic-ui/"
+
+      stylesheets_path = Pathname.new(source_root + "vendor/assets/stylesheets/semantic-ui")
+
+      FileUtils.rm_rf Dir.glob css_template_path + "*.*"
+
+      Dir.glob stylesheets_path + "**/*" do |file|
+        if File.directory? file
+          File.open(css_template_path + (Pathname.new(file).basename.to_s + ".less"), 'a') do |template|
+            Dir.glob(stylesheets_path + file + "**/*") do |file|
+              next if File.directory? file
+
+              filepath = Pathname.new(file)
+
+              relative_path = filepath.relative_path_from(stylesheets_path)
+
+              template.write "@import 'semantic-ui/#{relative_path}'; \n"
+            end
+          end
+        end
+      end
     end
 
     def clean
