@@ -68,10 +68,13 @@ $.fn.form = function(fields, parameters) {
             .on('submit' + eventNamespace, module.validate.form)
           ;
           $field
-            .on('blur' + eventNamespace, module.event.field.change)
+            .on('blur' + eventNamespace, module.event.field.blur)
           ;
           $submit
             .on('click' + eventNamespace, module.submit)
+          ;
+          $field
+            .on(module.get.changeEvent() + eventNamespace, module.event.field.change)
           ;
           module.instantiate();
         },
@@ -121,7 +124,7 @@ $.fn.form = function(fields, parameters) {
                   .blur()
                 ;
               }
-              if( key == keyCode.enter && $field.is(selector.input) ) {
+              if(!event.ctrlKey && key == keyCode.enter && $field.is(selector.input) ) {
                 module.debug('Enter key pressed, submitting form');
                 $submit
                   .addClass(className.down)
@@ -137,6 +140,19 @@ $.fn.form = function(fields, parameters) {
               module.verbose('Doing keyboard shortcut form submit');
               $submit.removeClass(className.down);
               module.submit();
+            },
+            blur: function() {
+              var
+                $field      = $(this),
+                $fieldGroup = $field.closest($group)
+              ;
+              if( $fieldGroup.hasClass(className.error) ) {
+                module.debug('Revalidating field', $field,  module.get.validation($field));
+                module.validate.field( module.get.validation($field) );
+              }
+              else if(settings.on == 'blur' || settings.on == 'change') {
+                module.validate.field( module.get.validation($field) );
+              }
             },
             change: function() {
               var
@@ -156,6 +172,14 @@ $.fn.form = function(fields, parameters) {
         },
 
         get: {
+          changeEvent: function() {
+            return (document.createElement('input').oninput !== undefined)
+              ? 'input'
+              : (document.createElement('input').onpropertychange !== undefined)
+                ? 'propertychange'
+                : 'keyup'
+            ;
+          },
           field: function(identifier) {
             module.verbose('Finding field with identifier', identifier);
             if( $field.filter('#' + identifier).size() > 0 ) {
@@ -208,25 +232,31 @@ $.fn.form = function(fields, parameters) {
               $prompt      = $fieldGroup.find(selector.prompt),
               promptExists = ($prompt.size() !== 0)
             ;
-            module.verbose('Adding inline validation prompt');
+            module.verbose('Adding inline error', field);
             $fieldGroup
               .addClass(className.error)
             ;
-            if(settings.inlineError) {
+            if(settings.inline) {
               if(!promptExists) {
                 $prompt = settings.templates.prompt(errors);
                 $prompt
                   .appendTo($fieldGroup)
-                  .hide()
                 ;
               }
               $prompt
                 .html(errors[0])
               ;
-              if($prompt.is(':not(:visible)')) {
-                $prompt
-                  .fadeIn(settings.animateSpeed)
-                ;
+              if(!promptExists) {
+                if(settings.transition && $.fn.transition !== undefined) {
+                  module.verbose('Displaying error with css transition', settings.transition);
+                  $prompt.transition(settings.transition + ' in', settings.duration);
+                }
+                else {
+                  module.verbose('Displaying error with fallback javascript animation');
+                  $prompt
+                    .fadeIn(settings.duration)
+                  ;
+                }
               }
             }
           },
@@ -248,8 +278,20 @@ $.fn.form = function(fields, parameters) {
             $fieldGroup
               .removeClass(className.error)
             ;
-            if(settings.inlineError) {
-              $prompt.hide();
+            if(settings.inline && $prompt.is(':visible')) {
+              module.verbose('Removing prompt for field', field);
+              if(settings.transition && $.fn.transition !== undefined) {
+                $prompt.transition(settings.transition + ' out', settings.duration, function() {
+                  $prompt.remove();
+                });
+              }
+              else {
+                $prompt
+                  .fadeOut(settings.duration, function(){
+                    $prompt.remove();
+                  })
+                ;
+              }
             }
           }
         },
@@ -278,7 +320,7 @@ $.fn.form = function(fields, parameters) {
             else {
               module.debug('Form has errors');
               $module.addClass(className.error);
-              if(!settings.inlineError) {
+              if(!settings.inline) {
                 module.add.errors(formErrors);
               }
               return $.proxy(settings.onFailure, this)(formErrors);
@@ -530,19 +572,20 @@ $.fn.form = function(fields, parameters) {
 
 $.fn.form.settings = {
 
-  // module info
-  name        : 'Form',
+  name              : 'Form',
+  namespace         : 'form',
 
   debug             : true,
   verbose           : true,
   performance       : true,
 
-  namespace         : 'form',
 
   keyboardShortcuts : true,
   on                : 'submit',
-  animateSpeed      : 150,
-  inlineError       : false,
+  inline            : false,
+
+  transition        : 'scale',
+  duration          : 150,
 
 
   onValid           : function() {},
@@ -555,19 +598,19 @@ $.fn.form.settings = {
   },
 
   selector : {
-    message   : '.error.message',
-    field     : 'input, textarea, select',
-    group     : '.field',
-    input     : 'input',
-    prompt    : '.prompt',
-    submit    : '.submit'
+    message : '.error.message',
+    field   : 'input, textarea, select',
+    group   : '.field',
+    input   : 'input',
+    prompt  : '.prompt',
+    submit  : '.submit'
   },
 
   className : {
-    error  : 'error',
-    success: 'success',
-    down   : 'down',
-    label  : 'ui label prompt'
+    error   : 'error',
+    success : 'success',
+    down    : 'down',
+    label   : 'ui label prompt'
   },
 
   // errors
@@ -615,6 +658,9 @@ $.fn.form.settings = {
     not: function(value, notValue) {
       return (value != notValue);
     },
+    contains: function(value, text) {
+      return (value.search(text) !== -1);
+    },
     is: function(value, text) {
       return (value == text);
     },
@@ -624,20 +670,20 @@ $.fn.form.settings = {
         : false
       ;
     },
-    match: function(value, matchingField) {
+    match: function(value, fieldIdentifier) {
       // use either id or name of field
       var
         $form = $(this),
         matchingValue
       ;
-      if($form.find('#' + matchingField).size() > 0) {
-        matchingValue = $form.find('#' + matchingField).val();
+      if($form.find('#' + fieldIdentifier).size() > 0) {
+        matchingValue = $form.find('#' + fieldIdentifier).val();
       }
-      else if($form.find('[name=' + matchingField +']').size() > 0) {
-        matchingValue = $form.find('[name=' + matchingField + ']').val();
+      else if($form.find('[name=' + fieldIdentifier +']').size() > 0) {
+        matchingValue = $form.find('[name=' + fieldIdentifier + ']').val();
       }
-      else if( $form.find('[data-validate="'+ matchingField +'"]').size() > 0 ) {
-        matchingValue = $form.find('[data-validate="'+ matchingField +'"]').val();
+      else if( $form.find('[data-validate="'+ fieldIdentifier +'"]').size() > 0 ) {
+        matchingValue = $form.find('[data-validate="'+ fieldIdentifier +'"]').val();
       }
       return (matchingValue !== undefined)
         ? ( value.toString() == matchingValue.toString() )

@@ -119,7 +119,7 @@ i.icon.trophy:before { content: '🏉'; } /* '\1f3c9' */
 i.icon.barcode:before { content: '\e792'; } /* '' */
 i.icon.cart:before { content: '\e813'; } /* '' */
 i.icon.block:before { content: '🚫'; } /* '\1f6ab' */
-i.icon.book:before { content: '📖'; } /* '\1f4d6' */
+i.icon.book:before { content: '\f4d6'; }
 i.icon.bookmark:before { content: '🔖'; } /* '\1f516' */
 i.icon.calendar:before { content: '📅'; } /* '\1f4c5' */
 i.icon.cancel:before { content: '\2716'; } /* '✖' */
@@ -322,6 +322,44 @@ i.circular.inverted.icon {
   -webkit-box-shadow: none;
   -moz-box-shadow: none;
   box-shadow: none;
+}
+
+/*-------------------
+      Flipped
+--------------------*/
+
+i.vertically.flipped.icon {
+  -webkit-transform: scale(1, -1);
+  -moz-transform: scale(1, -1);
+  -o-transform: scale(1, -1);
+  -ms-transform: scale(1, -1);
+  transform: scale(1, -1);
+}
+i.horizontally.flipped.icon {
+  -webkit-transform: scale(-1, 1);
+  -moz-transform: scale(-1, 1);
+  -o-transform: scale(-1, 1);
+  -ms-transform: scale(-1, 1);
+  transform: scale(-1, 1);
+}
+
+/*-------------------
+        Rotated
+--------------------*/
+
+i.left.rotated.icon {
+  -webkit-transform: rotate(-90deg);
+  -moz-transform: rotate(-90deg);
+  -o-transform: rotate(-90deg);
+  -ms-transform: rotate(-90deg);
+  transform: rotate(-90deg);
+}
+i.right.rotated.icon {
+  -webkit-transform: rotate(90deg);
+  -moz-transform: rotate(90deg);
+  -o-transform: rotate(90deg);
+  -ms-transform: rotate(90deg);
+  transform: rotate(90deg);
 }
 
 
