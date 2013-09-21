@@ -6,11 +6,13 @@ Semantic empowers designers and developers by creating a language for sharing UI
 Homepage: http://semantic-ui.com/
 
 ## Installation
-Inside your Gemfile add the following line:
+Inside your Gemfile add the following lines:
 ```ruby
+gem 'therubyracer', platforms: :ruby # or any other runtime
+gem 'less-rails'
 gem 'semantic-ui-rails'
 ```
-Then run `bundle install` to install the gem.
+Then run `bundle install` to install gems.
 
 Run generator to include assets to your project
 ```bash
