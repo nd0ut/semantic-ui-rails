@@ -46,8 +46,8 @@ class Semantic < Thor
       say_status "STEP", "PARSE VERSION"
       Dir.chdir git_root
 
-      component = JSON.parse( IO.read('component.json'), :quirks_mode => true)
-      version = component["version"]
+      bower = JSON.parse( IO.read('bower.json'), :quirks_mode => true)
+      version = bower["version"]
 
       version_file = source_root + "lib/semantic/ui/rails/version.rb"
 
