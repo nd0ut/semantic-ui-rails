@@ -1,10 +1,13 @@
-/*  ******************************
-  Accordion
-  Author: Jack Lukic
-  Notes: First Commit July 19, 2012
-
-  Simple accordion design
-******************************  */
+/*
+ * # Semantic - Accordion
+ * http://github.com/jlukic/semantic-ui/
+ *
+ *
+ * Copyright 2013 Contributors
+ * Released under the MIT license
+ * http://opensource.org/licenses/MIT
+ *
+ */
 
 ;(function ($, window, document, undefined) {
 
@@ -38,7 +41,6 @@ $.fn.accordion = function(parameters) {
       var
         $module  = $(this),
         $title   = $module.find(selector.title),
-        $icon    = $module.find(selector.icon),
         $content = $module.find(selector.content),
 
         element  = this,
@@ -131,9 +133,9 @@ $.fn.accordion = function(parameters) {
                 .children()
                   .animate({
                     opacity: 0
-                  }, settings.speed, module.event.resetStyle)
+                  }, settings.duration, module.event.resetStyle)
                   .end()
-                .slideUp(settings.speed , settings.easing, function() {
+                .slideUp(settings.duration , settings.easing, function() {
                   $previousContent
                     .removeClass(className.active)
                     .removeAttr('style')
@@ -151,7 +153,7 @@ $.fn.accordion = function(parameters) {
               .children()
                 .removeAttr('style')
                 .end()
-              .slideDown(settings.speed, settings.easing, function() {
+              .slideDown(settings.duration, settings.easing, function() {
                 $activeContent
                   .addClass(className.active)
                   .removeAttr('style')
@@ -179,9 +181,9 @@ $.fn.accordion = function(parameters) {
             .children()
               .animate({
                 opacity: 0
-              }, settings.speed, module.event.resetStyle)
+              }, settings.duration, module.event.resetStyle)
               .end()
-            .slideUp(settings.speed, settings.easing, function(){
+            .slideUp(settings.duration, settings.easing, function(){
               $activeContent
                 .removeAttr('style')
               ;
@@ -225,7 +227,7 @@ $.fn.accordion = function(parameters) {
               module.performance.log(arguments);
             }
             else {
-              module.debug = Function.prototype.bind.call(console.info, console, settings.moduleName + ':');
+              module.debug = Function.prototype.bind.call(console.info, console, settings.name + ':');
               module.debug.apply(console, arguments);
             }
           }
@@ -236,13 +238,13 @@ $.fn.accordion = function(parameters) {
               module.performance.log(arguments);
             }
             else {
-              module.verbose = Function.prototype.bind.call(console.info, console, settings.moduleName + ':');
+              module.verbose = Function.prototype.bind.call(console.info, console, settings.name + ':');
               module.verbose.apply(console, arguments);
             }
           }
         },
         error: function() {
-          module.error = Function.prototype.bind.call(console.error, console, settings.moduleName + ':');
+          module.error = Function.prototype.bind.call(console.error, console, settings.name + ':');
           module.error.apply(console, arguments);
         },
         performance: {
@@ -384,6 +386,9 @@ $.fn.accordion.settings = {
   exclusive   : true,
   collapsible : true,
 
+  duration    : 300,
+  easing      : 'linear',
+
   onOpen      : function(){},
   onClose     : function(){},
   onChange    : function(){},
@@ -393,18 +398,14 @@ $.fn.accordion.settings = {
   },
 
   className   : {
-    active    : 'active',
-    hover     : 'hover'
+    active : 'active'
   },
 
   selector    : {
-    title     : '.title',
-    icon      : '.icon',
-    content   : '.content'
+    title   : '.title',
+    content : '.content'
   },
 
-  speed       : 500,
-  easing      : 'easeInOutQuint'
 
 };
 

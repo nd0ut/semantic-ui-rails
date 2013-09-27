@@ -1,9 +1,13 @@
-/*  ******************************
-   Semantic dropdown: Dropdown
-   Author: Jack Lukic
-   Notes: First Commit May 25, 2013
-
-******************************  */
+/*
+ * # Semantic - Dropdown
+ * http://github.com/jlukic/semantic-ui/
+ *
+ *
+ * Copyright 2013 Contributors
+ * Released under the MIT license
+ * http://opensource.org/licenses/MIT
+ *
+ */
 
 ;(function ( $, window, document, undefined ) {
 
@@ -349,7 +353,12 @@ $.fn.dropdown = function(parameters) {
                 callback();
               }
               else if($.fn.transition !== undefined) {
-                $currentMenu.transition(settings.transition + ' in', settings.duration, callback);
+                $currentMenu.transition({
+                  animation : settings.transition + ' in',
+                  duration  : settings.duration,
+                  complete  : callback,
+                  queue     : false
+                })
               }
               else if(settings.transition == 'slide down') {
                 $currentMenu
@@ -392,7 +401,12 @@ $.fn.dropdown = function(parameters) {
             if(dropdown.is.visible($currentMenu) ) {
               dropdown.verbose('Doing menu hide animation', $currentMenu);
               if($.fn.transition !== undefined) {
-                $currentMenu.transition(settings.transition + ' out', settings.duration, callback);
+                $currentMenu.transition({
+                  animation : settings.transition + ' out',
+                  duration  : settings.duration,
+                  complete  : callback,
+                  queue     : false
+                })
               }
               else if(settings.transition == 'none') {
                 callback();
