@@ -20,15 +20,15 @@ module Semantic
         end
 
         # copy less manifests
-        css_manifests = 'app/assets/stylesheets/semantic-ui'
+        css_manifests = 'app/assets/stylesheets/semantic-ui.css.less'
 
-        if File.directory?(css_manifests)
+        if File.exist?(css_manifests)
           puts <<-EOM
           Notice:
             #{css_manifests} exist; skipping
           EOM
         else
-          directory "semantic-ui", css_manifests, :recursive => true
+          copy_file "semantic-ui", "app/assets/stylesheets/semantic-ui.css.less"
         end
 
       end
