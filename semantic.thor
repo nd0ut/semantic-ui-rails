@@ -24,8 +24,7 @@ class Semantic < Thor
 
     parse_version
     copy_files
-    fix_fonts_paths
-    fix_images_paths
+    fix_paths
     generate_templates
   end
 
@@ -39,9 +38,13 @@ class Semantic < Thor
     end
 
     def pull
-      say_status "STEP", "PULL REPO"
-      git = Git.open(git_root, :log => Logger.new(STDOUT))
-      git.pull
+      begin
+        say_status "STEP", "PULL REPO"
+        git = Git.open(git_root, :log => Logger.new(STDOUT))
+        git.pull
+      rescue
+        puts "no internet connection"
+      end
     end
 
     def parse_version
@@ -56,13 +59,10 @@ class Semantic < Thor
       gsub_file version_file, /(?<=VERSION = \")(.+)(?=\")/, version
     end
 
-    def fix_fonts_paths
-      gsub_file source_root + 'vendor/assets/stylesheets/semantic-ui/elements/icon.less', /(?<=url\()(.+\/fonts)(?=\/)/, '/assets/semantic-ui'
-      gsub_file source_root + 'vendor/assets/stylesheets/semantic-ui/elements/basic.icon.less', /(?<=url\()(.+\/fonts)(?=\/)/, '/assets/semantic-ui'
-    end
-
-    def fix_images_paths
-      # TODO: do it
+    def fix_paths
+      Dir.glob(source_root + "vendor" + "**/*.less") do |file|
+        gsub_file file, /(?<=url\()(.+\/\w+)(?=\/)/, '/assets/semantic-ui'
+      end
     end
 
     def copy_files
