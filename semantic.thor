@@ -107,26 +107,30 @@ class Semantic < Thor
       end
 
       # STYLESHEETS
-      say_status "STEP", "GENERATE STYLESHEETS TEMPLATES"
-      css_template_path = source_root + "lib/generators/semantic/install/templates/semantic-ui/"
+      say_status "STEP", "GENERATE STYLESHEETS TEMPLATE"
+      css_template_path = source_root + "lib/generators/semantic/install/templates/semantic-ui.css.less"
 
-      stylesheets_path = Pathname.new(source_root + "vendor/assets/stylesheets/semantic-ui")
+      stylesheets = Pathname.new(source_root + "vendor/assets/stylesheets/semantic-ui")
 
-      FileUtils.rm_rf Dir.glob css_template_path + "*.*"
+      FileUtils.rm css_template_path
 
-      Dir.glob stylesheets_path + "**/*" do |file|
-        if File.directory? file
-          File.open(css_template_path + (Pathname.new(file).basename.to_s + ".less"), 'a') do |template|
-            Dir.glob(stylesheets_path + file + "**/*") do |file|
-              next if File.directory? file
+      dirs_order = %w(elements collections views modules)
 
-              filepath = Pathname.new(file)
+      File.open(css_template_path, 'a') do |template|
+        dirs_order.each do |dir|
+          template.write "/* #{dir.capitalize} */ \n"
 
-              relative_path = filepath.relative_path_from(stylesheets_path)
+          Dir.glob(source_root + stylesheets + dir + "**/*") do |file|
+            next if File.directory? file
 
-              template.write "@import 'semantic-ui/#{relative_path}'; \n"
-            end
+            filepath = Pathname.new(file)
+
+            relative_path = filepath.relative_path_from(stylesheets)
+
+            template.write "@import 'semantic-ui/#{relative_path}'; \n"
           end
+
+          template.write "\n"
         end
       end
     end
