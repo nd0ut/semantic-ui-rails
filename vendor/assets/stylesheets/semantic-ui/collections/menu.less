@@ -245,26 +245,25 @@
 .ui.menu .item > .input input {
   width: 100%;
 }
-.ui.menu .input .icon {
-  padding-top: 0em;
+.ui.menu .ui.input > .icon {
+  padding-top: 0.1em;
   height: auto;
 }
 .ui.menu .item > .input input,
-.ui.menu .item > input {
+.ui.menu .item > input[type="text"] {
   position: relative;
-  top: -0.45em;
-  margin: 0em;
+  margin: -0.45em 0em;
   padding-top: 0.45em;
   padding-bottom: 0.45em;
 }
 .ui.vertical.menu .item > .input input,
-.ui.vertical.menu .item > input {
+.ui.vertical.menu .item > input[type="text"] {
   top: 0em;
   margin: 0em;
   padding-top: 0.63em;
   padding-bottom: 0.63em;
 }
-.ui.vertical.menu  .item > .input .icon {
+.ui.vertical.menu .ui.input > .icon {
   top: 0px;
   padding-top: 0.63em;
 }
@@ -589,11 +588,12 @@
 .ui.tiered.menu > .menu .item.active:after {
   position: absolute;
   content: '';
+  margin-top: -1px;
   top: 100%;
   left: 0px;
 
   width: 100%;
-  height: 1px;
+  height: 2px;
   background-color: #FBFBFB;
 }
 .ui.tiered.menu .sub.menu {
@@ -735,11 +735,12 @@
 .ui.pagination.menu {
   margin: 0em;
   display: inline-block;
+  vertical-align: middle;
 }
 
 .ui.pagination.menu .item {
   min-width: 2.7em;
-  min-height: 2.66em;
+  min-height: 2.7em;
   text-align: center;
 }
 .ui.pagination.menu.floated {
@@ -750,7 +751,7 @@
 .ui.pagination.menu .active.item {
   border-top: none;
   padding-top: 0.83em;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0.05);
   -webkit-box-shadow: none;
   -moz-box-shadow: none;
   box-shadow: none;
@@ -1749,7 +1750,6 @@
 
 .ui.menu .item {
   font-size: 1rem;
-  height: 2.66em;
 }
 .ui.vertical.menu {
   width: 15rem;

@@ -442,18 +442,13 @@ i.icon.check:before { content: "\f00c"; }
 i.icon.close:before { content: "\f00d"; }
 i.icon.delete:before { content: "\f00d"; }
 i.icon.like:before { content: "\f004"; }
+i.icon.plus:before { content: "\f067"; }
 i.icon.signup:before { content: "\f044"; }
-i.icon.dropdown:before { content: "\f0d7"; }
 
 
 /*--------------
    Spacing Fix
 ---------------*/
-
-/* dropdown arrows are to the right */
-i.dropdown.icon {
-  margin: 0em 0em 0em 0.5em;
-}
 
 /* stars are usually consecutive */
 i.icon.star {
@@ -494,7 +489,7 @@ i.icon.loading {
   -o-animation: icon-loading 2s linear infinite;
   animation: icon-loading 2s linear infinite;
 }
-@keyframes "icon-loading" {
+@keyframes icon-loading {
  from {
     -webkit-transform: rotate(0deg);
     -moz-transform: rotate(0deg);
@@ -520,7 +515,7 @@ i.icon.loading {
    transform: rotate(360deg);
  }
 }
-@-webkit-keyframes "icon-loading" {
+@-webkit-keyframes icon-loading {
  from {
    -webkit-transform: rotate(0deg);
    transform: rotate(0deg);
@@ -530,7 +525,7 @@ i.icon.loading {
    transform: rotate(360deg);
  }
 }
-@-ms-keyframes "icon-loading" {
+@-ms-keyframes icon-loading {
  from {
    -ms-transform: rotate(0deg);
    transform: rotate(0deg);
@@ -540,7 +535,7 @@ i.icon.loading {
    transform: rotate(360deg);
  }
 }
-@-o-keyframes "icon-loading" {
+@-o-keyframes icon-loading {
  from {
    -o-transform: rotate(0deg);
    transform: rotate(0deg);
@@ -760,17 +755,18 @@ i.icon {
   font-size: 1em;
 }
 i.large.icon {
+  font-size: 1.5em;
+  vertical-align: middle;
+}
+i.big.icon {
   font-size: 2em;
-  margin-right: 0.5em;
   vertical-align: middle;
 }
 i.huge.icon {
   font-size: 4em;
-  margin-right: 0.75em;
   vertical-align: middle;
 }
 i.massive.icon {
   font-size: 8em;
-  margin-right: 1em;
   vertical-align: middle;
 }

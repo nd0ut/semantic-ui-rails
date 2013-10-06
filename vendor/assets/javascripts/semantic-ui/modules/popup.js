@@ -253,7 +253,9 @@ $.fn.popup = function(parameters) {
           // refresh state of module
           module.refresh();
           if( !$module.hasClass(className.visible) ) {
-            module.hideAll();
+            if(settings.on == 'click') {
+              module.hideAll();
+            }
             module.show();
           }
           else {
@@ -551,11 +553,6 @@ $.fn.popup = function(parameters) {
             title += ' ' + totalTime + 'ms';
             if(moduleSelector) {
               title += ' \'' + moduleSelector + '\'';
-            }
-            if($allModules.size() > 1) {
-              if($allModules.size() > 1) {
-              title += ' ' + '(' + $allModules.size() + ')';
-            }
             }
             if( (console.group !== undefined || console.table !== undefined) && performance.length > 0) {
               console.groupCollapsed(title);

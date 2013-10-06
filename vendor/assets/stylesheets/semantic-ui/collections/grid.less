@@ -26,6 +26,12 @@
   -ms-box-sizing: border-box;
   box-sizing: border-box;
 }
+
+body > .ui.grid {
+  margin-left: 0%;
+  margin-right: 0%;
+}
+
 .ui.grid:after,
 .ui.row:after {
   content: ".";
@@ -92,64 +98,39 @@
 *******************************/
 
 
-/*-------------------
-        Page
---------------------*/
+/*-----------------------
+  Page Grid (Responsive)
+-------------------------*/
 
 .ui.page.grid {
-  margin: 0%;
-  padding: 0% 2%;
-}
-
-
-/*-------------------
-      Responsive
---------------------*/
-
-.ui.responsive.grid {
-  margin-left: 0% !important;
-  margin-right: 0% !important;
   min-width: 320px;
+  margin-left: 0%;
+  margin-right: 0%;
 }
 
-@media only screen and (max-width : 1000px) {
-  .ui.responsive.grid {
-    padding: 0% 5.55%;
-  }
-  .ui.responsive.grid > .column,
-  .ui.responsive.grid > .row > .column {
+@media only screen and (max-width : 998px) {
+  .ui.page.grid {
+    padding: 0% 4%;
   }
 }
-@media only screen and (min-width : 1000px) {
-  .ui.responsive.grid {
+@media only screen and (min-width : 998px) {
+  .ui.page.grid {
     padding: 0% 8%;
-  }
-  .ui.responsive.grid > .column,
-  .ui.responsive.grid > .row > .column {
   }
 }
 @media only screen and (min-width : 1500px) {
-  .ui.responsive.grid {
+  .ui.page.grid {
     padding: 0% 13%;
-  }
-  .ui.responsive.grid > .column,
-  .ui.responsive.grid > .row > .column {
   }
 }
 @media only screen and (min-width : 1750px) {
-  .ui.responsive.grid {
+  .ui.page.grid {
     padding: 0% 18%;
-  }
-  .ui.responsive.grid > .column,
-  .ui.responsive.grid > .row > .column {
   }
 }
 @media only screen and (min-width : 2000px) {
-  .ui.responsive.grid {
+  .ui.page.grid {
     padding: 0% 23%;
-  }
-  .ui.responsive.grid > .column,
-  .ui.responsive.grid > .row > .column {
   }
 }
 
@@ -432,7 +413,7 @@
   box-shadow: none;
 }
 
-.ui.celled.responsive.grid {
+.ui.celled.page.grid {
   -webkit-box-shadow: none;
   -moz-box-shadow: none;
   box-shadow: none;
