@@ -28,7 +28,7 @@ module Semantic
             #{css_manifests} exist; skipping
           EOM
         else
-          copy_file "semantic-ui", "app/assets/stylesheets/semantic-ui.css.less"
+          copy_file "semantic-ui.css.less", "app/assets/stylesheets/semantic-ui.css.less"
         end
 
       end
