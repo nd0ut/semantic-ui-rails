@@ -22,7 +22,7 @@ class Semantic < Thor
       clone
     end
 
-    parse_version
+    #parse_version
     copy_files
     fix_paths
     generate_templates
@@ -61,7 +61,7 @@ class Semantic < Thor
 
     def fix_paths
       Dir.glob(source_root + "vendor" + "**/*.less") do |file|
-        gsub_file file, /(?<=url\()(.+\/\w+)(?=\/)/, '/assets/semantic-ui'
+        gsub_file file, /(?<=url\()(.+\/\w+)(?=\/)/, '..'
       end
     end
 
@@ -77,7 +77,7 @@ class Semantic < Thor
       run "rsync -avm --include='*.js' -f 'hide,! */' #{git_root + 'src/'} #{source_root + javascripts_path}"
 
       # FONTS
-      fonts_path = "vendor/assets/fonts/semantic-ui"
+      fonts_path = "vendor/assets/fonts/semantic-ui/"
       run "rsync -avm --include='*.*' -f 'hide,! */' #{git_root + 'src/fonts/'} #{source_root + fonts_path}"
 
       # IMAGES
