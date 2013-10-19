@@ -33,7 +33,7 @@ $.fn.modal = function(parameters) {
       var
         settings    = ( $.isPlainObject(parameters) )
           ? $.extend(true, {}, $.fn.modal.settings, parameters)
-          : $.fn.modal.settings,
+          : $.extend({}, $.fn.modal.settings),
 
         selector        = settings.selector,
         className       = settings.className,
@@ -50,6 +50,7 @@ $.fn.modal = function(parameters) {
         $close       = $module.find(selector.close),
 
         $focusedElement,
+        $dimmable,
         $dimmer,
 
         element      = this,
@@ -62,8 +63,16 @@ $.fn.modal = function(parameters) {
         initialize: function() {
           module.verbose('Initializing dimmer', $context);
 
-          $dimmer = $context
+          $dimmable = $context
+            .dimmer({
+              closable : false,
+              show     : settings.duration * 0.95,
+              hide     : settings.duration * 1.05
+            })
             .dimmer('add content', $module)
+          ;
+          $dimmer = $dimmable
+            .dimmer('get dimmer')
           ;
 
           module.verbose('Attaching close events', $close);
@@ -89,7 +98,14 @@ $.fn.modal = function(parameters) {
         destroy: function() {
           module.verbose('Destroying previous modal');
           $module
+            .removeData(moduleNamespace)
             .off(eventNamespace)
+          ;
+          $close
+            .off(eventNamespace)
+          ;
+          $context
+            .dimmer('destroy')
           ;
         },
 
@@ -122,8 +138,21 @@ $.fn.modal = function(parameters) {
 
         event: {
           close: function() {
-            module.verbose('Close button pressed');
+            module.verbose('Closing element pressed');
+            if( $(this).is(selector.approve) ) {
+              $.proxy(settings.onApprove, element)();
+            }
+            if( $(this).is(selector.deny) ) {
+              $.proxy(settings.onDeny, element)();
+            }
             module.hide();
+          },
+          click: function(event) {
+            module.verbose('Determining if event occured on dimmer', event);
+            if( $dimmer.find(event.target).size() === 0 ) {
+              module.hide();
+              event.stopImmediatePropagation();
+            }
           },
           debounce: function(method, delay) {
             clearTimeout(module.timer);
@@ -135,13 +164,18 @@ $.fn.modal = function(parameters) {
               escapeKey = 27
             ;
             if(keyCode == escapeKey) {
-              module.debug('Escape key pressed hiding modal');
-              module.hide();
+              if(settings.closable) {
+                module.debug('Escape key pressed hiding modal');
+                module.hide();
+              }
+              else {
+                module.debug('Escape key pressed, but closable is set to false');
+              }
               event.preventDefault();
             }
           },
           resize: function() {
-            if( $dimmer.dimmer('is active') ) {
+            if( $dimmable.dimmer('is active') ) {
               module.refresh();
             }
           }
@@ -177,13 +211,17 @@ $.fn.modal = function(parameters) {
 
         showDimmer: function() {
           module.debug('Showing modal');
-          module.set.dimmerSettings();
-          $dimmer.dimmer('show');
+          $dimmable.dimmer('show');
         },
 
         hide: function() {
-          if( $dimmer.dimmer('is active') ) {
-            $dimmer.dimmer('hide');
+          if(settings.closable) {
+            $dimmer
+              .off('click' + eventNamespace)
+            ;
+          }
+          if( $dimmable.dimmer('is active') ) {
+            $dimmable.dimmer('hide');
           }
           if( module.is.active() ) {
             module.hideModal();
@@ -196,7 +234,7 @@ $.fn.modal = function(parameters) {
 
         hideDimmer: function() {
           module.debug('Hiding dimmer');
-          $dimmer.dimmer('hide');
+          $dimmable.dimmer('hide');
         },
 
         hideModal: function() {
@@ -261,7 +299,7 @@ $.fn.modal = function(parameters) {
             ;
           },
           scrolling: function() {
-            $dimmer.removeClass(className.scrolling);
+            $dimmable.removeClass(className.scrolling);
             $module.removeClass(className.scrolling);
           }
         },
@@ -271,7 +309,7 @@ $.fn.modal = function(parameters) {
             height        : $module.outerHeight() + settings.offset,
             contextHeight : (settings.context == 'body')
               ? $(window).height()
-              : $dimmer.height()
+              : $dimmable.height()
           };
           module.debug('Caching modal and container sizes', module.cache);
         },
@@ -290,6 +328,7 @@ $.fn.modal = function(parameters) {
 
         set: {
           active: function() {
+            module.add.keyboardShortcuts();
             module.save.focus();
             module.set.type();
             $module
@@ -297,27 +336,12 @@ $.fn.modal = function(parameters) {
             ;
             if(settings.closable) {
               $dimmer
-                .dimmer('get dimmer')
-                .on('click', module.hide)
+                .on('click' + eventNamespace, module.event.click)
               ;
             }
           },
-          dimmerSettings: function() {
-            module.debug('Setting dimmer settings', $dimmer);
-            $dimmer
-              .dimmer('setting', 'closable', false)
-              .dimmer('setting', 'duration', {
-                show : settings.duration * 0.95,
-                hide : settings.duration * 1.05
-              })
-              .dimmer('setting', 'onShow' , module.add.keyboardShortcuts)
-              // destory after changing settings in order to reattach events
-              .dimmer('destroy')
-              .dimmer('initialize')
-            ;
-          },
           scrolling: function() {
-            $dimmer.addClass(className.scrolling);
+            $dimmable.addClass(className.scrolling);
             $module.addClass(className.scrolling);
           },
           type: function() {
@@ -547,9 +571,13 @@ $.fn.modal.settings = {
 
   onShow      : function(){},
   onHide      : function(){},
+  onApprove   : function(){},
+  onDeny      : function(){},
 
   selector    : {
-    close : '.close, .actions .button'
+    close    : '.close, .actions .button',
+    approve  : '.actions .positive, .actions .approve',
+    deny     : '.actions .negative, .actions .cancel'
   },
   error : {
     method : 'The method you called is not defined.'
