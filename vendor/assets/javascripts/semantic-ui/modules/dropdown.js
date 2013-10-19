@@ -11,18 +11,19 @@
 ;(function ( $, window, document, undefined ) {
 
 $.fn.dropdown = function(parameters) {
-  var
-    $allModules = $(this),
-    $document   = $(document),
+    var
+    $allModules    = $(this),
+    $document      = $(document),
 
-    moduleSelector  = $allModules.selector || '',
+    moduleSelector = $allModules.selector || '',
 
-    time              = new Date().getTime(),
-    performance       = [],
+    hasTouch       = ('ontouchstart' in document.documentElement),
+    time           = new Date().getTime(),
+    performance    = [],
 
-    query             = arguments[0],
-    methodInvoked     = (typeof query == 'string'),
-    queryArguments    = [].slice.call(arguments, 1),
+    query          = arguments[0],
+    methodInvoked  = (typeof query == 'string'),
+    queryArguments = [].slice.call(arguments, 1),
     invokedResponse
   ;
 
@@ -31,28 +32,27 @@ $.fn.dropdown = function(parameters) {
       var
         settings          = ( $.isPlainObject(parameters) )
           ? $.extend(true, {}, $.fn.dropdown.settings, parameters)
-          : $.fn.dropdown.settings,
+          : $.extend({}, $.fn.dropdown.settings),
 
-        className         = settings.className,
-        metadata          = settings.metadata,
-        namespace         = settings.namespace,
-        selector          = settings.selector,
-        error             = settings.error,
+        className       = settings.className,
+        metadata        = settings.metadata,
+        namespace       = settings.namespace,
+        selector        = settings.selector,
+        error           = settings.error,
 
-        eventNamespace    = '.' + namespace,
-        dropdownNamespace = 'module-' + namespace,
-        isTouchDevice     = ('ontouchstart' in document.documentElement),
+        eventNamespace  = '.' + namespace,
+        moduleNamespace = 'module-' + namespace,
 
-        $module           = $(this),
-        $item             = $module.find(selector.item),
-        $text             = $module.find(selector.text),
-        $input            = $module.find(selector.input),
+        $module         = $(this),
+        $item           = $module.find(selector.item),
+        $text           = $module.find(selector.text),
+        $input          = $module.find(selector.input),
 
-        $menu             = $module.children(selector.menu),
+        $menu           = $module.children(selector.menu),
 
 
-        element           = this,
-        instance          = $module.data(dropdownNamespace),
+        element         = this,
+        instance        = $module.data(moduleNamespace),
         module
       ;
 
@@ -60,42 +60,27 @@ $.fn.dropdown = function(parameters) {
 
         initialize: function() {
           module.debug('Initializing dropdown', settings);
-          if(isTouchDevice) {
-            $module
-              .on('touchstart' + eventNamespace, module.event.test.toggle)
-            ;
+
+          module.set.selected();
+
+          // no use detecting mouse events because touch devices emulate them
+          if(hasTouch) {
+            module.bind.touchEvents();
           }
-          else if(settings.on == 'click') {
-            $module
-              .on('click' + eventNamespace, module.event.test.toggle)
-            ;
-          }
-          else if(settings.on == 'hover') {
-            $module
-              .on('mouseenter' + eventNamespace, module.delay.show)
-              .on('mouseleave' + eventNamespace, module.delay.hide)
-            ;
-          }
-          else {
-            $module
-              .on(settings.on + eventNamespace, module.toggle)
-            ;
-          }
-          if(settings.action == 'updateForm') {
-            module.set.selected();
-          }
-          $item
-            .on('mouseenter' + eventNamespace, module.event.item.mouseenter)
-            .on('mouseleave' + eventNamespace, module.event.item.mouseleave)
-            .on(module.get.selectEvent() + eventNamespace, module.event.item.click)
+          module.bind.mouseEvents();
+
+          $document
+            .one('mousemove' + eventNamespace, module.set.hasMouse)
           ;
+
           module.instantiate();
         },
 
         instantiate: function() {
           module.verbose('Storing instance of dropdown', module);
+          instance = module;
           $module
-            .data(dropdownNamespace, module)
+            .data(moduleNamespace, module)
           ;
         },
 
@@ -106,20 +91,93 @@ $.fn.dropdown = function(parameters) {
           ;
           $module
             .off(eventNamespace)
-            .removeData(dropdownNamespace)
+            .removeData(moduleNamespace)
           ;
         },
 
-        event: {
+        bind: {
+          touchEvents: function() {
+            module.debug('Touch device detected binding touch events');
+            $module
+              .on('touchstart' + eventNamespace, module.event.test.toggle)
+            ;
+            $item
+              .on('touchstart' + eventNamespace, module.event.item.mouseenter)
+              .on('touchstart' + eventNamespace, module.event.item.click)
+            ;
+          },
+          mouseEvents: function() {
+            module.verbose('Mouse detected binding mouse events');
+            if(settings.on == 'click') {
+              $module
+                .on('click' + eventNamespace, module.event.test.toggle)
+              ;
+            }
+            else if(settings.on == 'hover') {
+              $module
+                .on('mouseenter' + eventNamespace, module.delay.show)
+                .on('mouseleave' + eventNamespace, module.delay.hide)
+              ;
+            }
+            else {
+              $module
+                .on(settings.on + eventNamespace, module.toggle)
+              ;
+            }
+            $item
+              .on('mouseenter' + eventNamespace, module.event.item.mouseenter)
+              .on('mouseleave' + eventNamespace, module.event.item.mouseleave)
+              .on('click'      + eventNamespace, module.event.item.click)
+            ;
+          },
+          intent: function() {
+            module.verbose('Binding hide intent event to document');
+            if(hasTouch) {
+              $document
+                .on('touchstart' + eventNamespace, module.event.test.touch)
+                .on('touchmove'  + eventNamespace, module.event.test.touch)
+              ;
+            }
+            $document
+              .on('click' + eventNamespace, module.event.test.hide)
+            ;
+          }
+        },
 
+        unbind: {
+          intent: function() {
+            module.verbose('Removing hide intent event from document');
+            if(hasTouch) {
+              $document
+                .off('touchstart' + eventNamespace)
+              ;
+            }
+            $document
+              .off('click' + eventNamespace)
+            ;
+          }
+        },
+
+        event: {
           test: {
             toggle: function(event) {
               module.determine.intent(event, module.toggle);
+              event.preventDefault();
               event.stopImmediatePropagation();
+            },
+            touch: function(event) {
+              module.determine.intent(event, function() {
+                if(event.type == 'touchstart') {
+                  module.timer = setTimeout(module.hide, settings.delay.touch);
+                }
+                else if(event.type == 'touchmove') {
+                  clearTimeout(module.timer);
+                }
+              });
+              event.stopPropagation();
             },
             hide: function(event) {
               module.determine.intent(event, module.hide);
-              event.stopPropagation();
             }
           },
 
@@ -137,6 +195,7 @@ $.fn.dropdown = function(parameters) {
                   module.verbose('Showing sub-menu', $currentMenu);
                   module.animate.show(false,  $currentMenu);
                 }, settings.delay.show * 2);
+                event.preventDefault();
               }
             },
 
@@ -160,13 +219,6 @@ $.fn.dropdown = function(parameters) {
                 value   = $choice.data(metadata.value) || text.toLowerCase()
               ;
               if( $choice.find(selector.menu).size() === 0 ) {
-                module.verbose('Adding active state to selected item');
-                $item
-                  .removeClass(className.active)
-                ;
-                $choice
-                  .addClass(className.active)
-                ;
                 module.determine.selectAction(text, value);
                 $.proxy(settings.onChange, element)(value, text);
               }
@@ -183,19 +235,9 @@ $.fn.dropdown = function(parameters) {
         determine: {
           selectAction: function(text, value) {
             module.verbose('Determining action', settings.action);
-            if(settings.action == 'auto') {
-              if(module.is.selection()) {
-                module.debug('Selection dropdown used updating form', text, value);
-                module.updateForm(text, value);
-              }
-              else {
-                module.debug('No action specified hiding dropdown', text, value);
-                module.hide();
-              }
-            }
-            else if( $.isFunction( module[settings.action] ) ) {
+            if( $.isFunction( module.action[settings.action] ) ) {
               module.verbose('Triggering preset action', settings.action, text, value);
-              module[ settings.action ](text, value);
+              module.action[ settings.action ](text, value);
             }
             else if( $.isFunction(settings.action) ) {
               module.verbose('Triggering user action', settings.action, text, value);
@@ -211,51 +253,56 @@ $.fn.dropdown = function(parameters) {
             if( $(event.target).closest($menu).size() === 0 ) {
               module.verbose('Triggering event', callback);
               callback();
+              return true;
             }
             else {
               module.verbose('Event occurred in dropdown, canceling callback');
+              return false;
             }
           }
         },
 
-        bind: {
-          intent: function() {
-            module.verbose('Binding hide intent event to document');
-            $document
-              .on(module.get.selectEvent(), module.event.test.hide)
-            ;
+        action: {
+
+          nothing: function() {},
+
+          hide: function() {
+            module.hide();
+          },
+
+          activate: function(text, value) {
+            value = value || text;
+            module.set.selected(value);
+            module.set.value(value);
+            module.hide();
+          },
+
+          /* Deprecated */
+          auto: function(text, value) {
+            value = value || text;
+            module.set.selected(value);
+            module.set.value(value);
+            module.hide();
+          },
+
+          /* Deprecated */
+          changeText: function(text, value) {
+            value = value || text;
+            module.set.selected(value);
+            module.hide();
+          },
+
+          /* Deprecated */
+          updateForm: function(text, value) {
+            value = value || text;
+            module.set.selected(value);
+            module.set.value(value);
+            module.hide();
           }
-        },
 
-        unbind: {
-          intent: function() {
-            module.verbose('Removing hide intent event from document');
-            $document
-              .off(module.get.selectEvent())
-            ;
-          }
-        },
-
-        nothing: function() {},
-
-        changeText: function(text, value) {
-          module.set.text(text);
-          module.hide();
-        },
-
-        updateForm: function(text, value) {
-          module.set.text(text);
-          module.set.value(value);
-          module.hide();
         },
 
         get: {
-          selectEvent: function() {
-            return (isTouchDevice)
-              ? 'touchstart'
-              : 'click'
-            ;
-          },
           text: function() {
             return $text.text();
           },
@@ -266,14 +313,25 @@ $.fn.dropdown = function(parameters) {
             var
               $selectedItem
             ;
-            value = value || $input.val();
-            $item
-              .each(function() {
-                if( $(this).data(metadata.value) == value ) {
-                  $selectedItem = $(this);
-                }
-              })
-            ;
+            value = value || module.get.value() || module.get.text();
+            if(value) {
+              $item
+                .each(function() {
+                  var
+                    $choice       = $(this),
+                    optionText    = $choice.data(metadata.text)  || $choice.text(),
+                    optionValue   = $choice.data(metadata.value) || optionText.toLowerCase()
+                  ;
+                  if( optionValue == value || optionText == value ) {
+                    $selectedItem = $(this);
+                    return false;
+                  }
+                })
+              ;
+            }
+            else {
+              value = module.get.text();
+            }
             return $selectedItem || false;
           }
         },
@@ -342,7 +400,7 @@ $.fn.dropdown = function(parameters) {
 
         can: {
           click: function() {
-            return (isTouchDevice || settings.on == 'click');
+            return (hasTouch || settings.on == 'click');
           },
           show: function() {
             return !$module.hasClass(className.disabled);
@@ -700,11 +758,12 @@ $.fn.dropdown.settings = {
   performance : true,
 
   on          : 'click',
-  action      : 'auto',
+  action      : 'activate',
 
   delay: {
-    show: 200,
-    hide: 300
+    show  : 200,
+    hide  : 300,
+    touch : 50
   },
 
   transition : 'slide down',
@@ -721,8 +780,8 @@ $.fn.dropdown.settings = {
   },
 
   metadata: {
-    text  : 'text',
-    value : 'value'
+    text    : 'text',
+    value   : 'value'
   },
 
   selector : {

@@ -30,7 +30,7 @@ $.fn.dimmer = function(parameters) {
       var
         settings        = ( $.isPlainObject(parameters) )
           ? $.extend(true, {}, $.fn.dimmer.settings, parameters)
-          : $.fn.dimmer.settings,
+          : $.extend({}, $.fn.dimmer.settings),
 
         selector        = settings.selector,
         namespace       = settings.namespace,
@@ -53,6 +53,8 @@ $.fn.dimmer = function(parameters) {
         instance  = $module.data(moduleNamespace),
         module
       ;
+
+      console.log(element, parameters);
 
       module = {
 
@@ -111,6 +113,9 @@ $.fn.dimmer = function(parameters) {
 
         destroy: function() {
           module.verbose('Destroying previous module', $dimmer);
+          $module
+            .removeData(moduleNamespace)
+          ;
           $dimmable
             .off(eventNamespace)
           ;
