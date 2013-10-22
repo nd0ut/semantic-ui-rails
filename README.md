@@ -26,6 +26,11 @@ Last single number is the version of this gem with the same Semantic UI version.
 
 i.e. `0.3.5.3` means that `0.3.5` is Semantic UI version and `.3` is the rails gem version.
 
+## Pull Semantic UI from it's repository
+If you want to update version to newer, run
+`thor semantic:update`
+from gem root path and create new Pull Request
+
 ## Contributing
 
 1. Fork it
