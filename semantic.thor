@@ -60,7 +60,7 @@ class Semantic < Thor
     end
 
     def fix_paths
-      Dir.glob(source_root + "vendor" + "**/*.less") do |file|
+      Dir.glob(source_root + "app" + "**/*.less") do |file|
         gsub_file file, /(?<=url\()(.+\/\w+)(?=\/)/, '..'
       end
     end
@@ -69,19 +69,19 @@ class Semantic < Thor
       say_status "STEP", "COPY FILES"
 
       # STYLESHEETS
-      stylesheets_path = "vendor/assets/stylesheets/semantic-ui/"
+      stylesheets_path = "app/assets/stylesheets/semantic-ui/"
       run "rsync -avm --include='*.less' --include='*.css' -f 'hide,! */' #{git_root + 'src/'} #{source_root + stylesheets_path}"
 
       # JAVASCRIPTS
-      javascripts_path = "vendor/assets/javascripts/semantic-ui/"
+      javascripts_path = "app/assets/javascripts/semantic-ui/"
       run "rsync -avm --include='*.js' -f 'hide,! */' #{git_root + 'src/'} #{source_root + javascripts_path}"
 
       # FONTS
-      fonts_path = "vendor/assets/fonts/semantic-ui/"
+      fonts_path = "app/assets/fonts/semantic-ui/"
       run "rsync -avm --include='*.*' -f 'hide,! */' #{git_root + 'src/fonts/'} #{source_root + fonts_path}"
 
       # IMAGES
-      images_path = "vendor/assets/images/semantic-ui/"
+      images_path = "app/assets/images/semantic-ui/"
       run "rsync -avm --include='*.*' -f 'hide,! */' #{git_root + 'src/images/'} #{source_root + images_path}"
     end
 
@@ -90,7 +90,7 @@ class Semantic < Thor
       say_status "STEP", "GENERATE JAVASCRIPT TEMPLATE"
       js_template_path = source_root + "lib/generators/semantic/install/templates/semantic-ui.js"
 
-      javascripts_path = Pathname.new(source_root + "vendor/assets/javascripts/semantic-ui")
+      javascripts_path = Pathname.new(source_root + "app/assets/javascripts/semantic-ui")
 
       FileUtils.rm js_template_path
 
@@ -110,7 +110,7 @@ class Semantic < Thor
       say_status "STEP", "GENERATE STYLESHEETS TEMPLATE"
       css_template_path = source_root + "lib/generators/semantic/install/templates/semantic-ui.css.less"
 
-      stylesheets = Pathname.new(source_root + "vendor/assets/stylesheets/semantic-ui")
+      stylesheets = Pathname.new(source_root + "app/assets/stylesheets/semantic-ui")
 
       FileUtils.rm css_template_path
 
