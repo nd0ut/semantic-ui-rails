@@ -63,7 +63,7 @@ class Semantic < Thor
       Dir.glob(source_root + "app" + "**/*.less") do |file|
         gsub_file file, /(?<=url\()(.+\/\w+)(?=\/)/, 'semantic-ui'
         gsub_file file, /(?<= )(url)(?=\()/, 'asset-url'
-        gsub_file file, /(?<=asset-url\()(.+)(?=\) |;)/, '"\\1"'
+        gsub_file file, /(?<=asset-url\()(.+)(?=\) |\);)/, '"\\1"'
       end
     end
 
