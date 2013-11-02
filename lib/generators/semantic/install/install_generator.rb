@@ -9,28 +9,11 @@ module Semantic
       def add_assets
         # copy js manifest
         js_manifest = 'app/assets/javascripts/semantic-ui.js'
-
-        if File.exist?(js_manifest)
-          puts <<-EOM
-          Notice:
-            #{js_manifest} exist; skipping
-          EOM
-        else
-          copy_file "semantic-ui.js", "app/assets/javascripts/semantic-ui.js"
-        end
+        copy_file "semantic-ui.js", "app/assets/javascripts/semantic-ui.js"
 
         # copy less manifests
         css_manifests = 'app/assets/stylesheets/semantic-ui.css.less'
-
-        if File.exist?(css_manifests)
-          puts <<-EOM
-          Notice:
-            #{css_manifests} exist; skipping
-          EOM
-        else
-          copy_file "semantic-ui.css.less", "app/assets/stylesheets/semantic-ui.css.less"
-        end
-
+        copy_file "semantic-ui.css.less", "app/assets/stylesheets/semantic-ui.css.less"
       end
     end
   end
