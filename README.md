@@ -10,6 +10,7 @@ Inside your Gemfile add the following lines:
 ```ruby
 gem 'therubyracer', platforms: :ruby # or any other runtime
 gem 'less-rails'
+gem 'autoprefixer-rails'
 gem 'semantic-ui-rails'
 ```
 Then run `bundle install` to install gems.
