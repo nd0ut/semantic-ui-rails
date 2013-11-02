@@ -70,20 +70,26 @@ class Semantic < Thor
     def copy_files
       say_status "STEP", "COPY FILES"
 
+      FileUtils.rm_rf(source_root + 'app/assets')
+
       # STYLESHEETS
       stylesheets_path = "app/assets/stylesheets/semantic-ui/"
+      FileUtils.mkdir_p source_root + stylesheets_path
       run "rsync -avm --include='*.less' --include='*.css' -f 'hide,! */' #{git_root + 'src/'} #{source_root + stylesheets_path}"
 
       # JAVASCRIPTS
       javascripts_path = "app/assets/javascripts/semantic-ui/"
+      FileUtils.mkdir_p source_root + javascripts_path
       run "rsync -avm --include='*.js' -f 'hide,! */' #{git_root + 'src/'} #{source_root + javascripts_path}"
 
       # FONTS
       fonts_path = "app/assets/fonts/semantic-ui/"
+      FileUtils.mkdir_p source_root + fonts_path
       run "rsync -avm --include='*.*' -f 'hide,! */' #{git_root + 'src/fonts/'} #{source_root + fonts_path}"
 
       # IMAGES
       images_path = "app/assets/images/semantic-ui/"
+      FileUtils.mkdir_p source_root + images_path
       run "rsync -avm --include='*.*' -f 'hide,! */' #{git_root + 'src/images/'} #{source_root + images_path}"
     end
 
