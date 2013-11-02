@@ -122,18 +122,28 @@ class Semantic < Thor
         dirs_order.each do |dir|
           template.write "/* #{dir.capitalize} */ \n"
 
-          Dir.glob(source_root + stylesheets + dir + "**/*") do |file|
-            next if File.directory? file
+          file_list = Dir.glob(source_root + stylesheets + dir + "**/*")
 
-            filepath = Pathname.new(file)
+          # transition should be last
+          file_to_end(file_list, /transition.less/)
 
-            relative_path = filepath.relative_path_from(stylesheets)
+          file_list.each do |filepath|
+            relative_path = Pathname.new(filepath).relative_path_from(stylesheets)
 
             template.write "@import 'semantic-ui/#{relative_path}'; \n"
           end
 
           template.write "\n"
         end
+      end
+    end
+
+    def file_to_end(file_list, file_regexp)
+      found = file_list.grep(file_regexp)
+      file = found.first if found
+
+      if file
+        file_list.insert(file_list.length - 1, file_list.delete_at(file_list.index(file)))
       end
     end
 
