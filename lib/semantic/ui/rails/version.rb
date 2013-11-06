@@ -1,7 +1,7 @@
 module Semantic
   module Ui
     module Rails
-      VERSION = "0.8.6.1"
+      VERSION = "0.8.6"
     end
   end
 end
