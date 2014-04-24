@@ -226,7 +226,7 @@ $.fn.transition = function() {
             var
               displayType = module.get.displayType()
             ;
-            if(displayType !== 'block') {
+            if(displayType !== 'block' && displayType !== 'none') {
               module.verbose('Setting final visibility to', displayType);
               $module
                 .css({
@@ -460,7 +460,7 @@ $.fn.transition = function() {
               animations  = {
                 'animation'       :'animationend',
                 'OAnimation'      :'oAnimationEnd',
-                'MozAnimation'    :'mozAnimationEnd',
+                'MozAnimation'    :'animationend',
                 'WebkitAnimation' :'webkitAnimationEnd'
               },
               animation

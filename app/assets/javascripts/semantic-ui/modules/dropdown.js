@@ -181,17 +181,22 @@ $.fn.dropdown = function(parameters) {
 
             mouseenter: function(event) {
               var
-                $currentMenu = $(this).find(selector.menu),
+                $currentMenu = $(this).find(selector.submenu),
                 $otherMenus  = $(this).siblings(selector.item).children(selector.menu)
               ;
-              if( $currentMenu.size() > 0 ) {
+              if($currentMenu.length > 0  || $otherMenus.length > 0) {
                 clearTimeout(module.itemTimer);
-                module.itemTimer = setTimeout(function() {
-                  module.animate.hide(false, $otherMenus);
-                  module.verbose('Showing sub-menu', $currentMenu);
-                  module.animate.show(false,  $currentMenu);
+                  module.itemTimer = setTimeout(function() {
+                  if($otherMenus.length > 0) {
+                    module.animate.hide(false, $otherMenus.filter(':visible'));
+                  }
+                  if($currentMenu.length > 0) {
+                    module.verbose('Showing sub-menu', $currentMenu);
+                    module.animate.show(false, $currentMenu);
+                  }
                 }, settings.delay.show * 2);
                 event.preventDefault();
+                event.stopPropagation();
               }
             },
 
@@ -216,7 +221,9 @@ $.fn.dropdown = function(parameters) {
                   : $choice.text(),
                 value   = ( $choice.data(metadata.value) !== undefined)
                   ? $choice.data(metadata.value)
-                  : text.toLowerCase(),
+                  : (typeof text === 'string')
+                      ? text.toLowerCase()
+                      : text,
                 callback = function() {
                   module.determine.selectAction(text, value);
                   $.proxy(settings.onChange, element)(value, text);
@@ -332,7 +339,7 @@ $.fn.dropdown = function(parameters) {
               : $module.data(metadata.value)
             ;
           },
-          item: function(value) {
+          item: function(value, strict) {
             var
               $selectedItem = false
             ;
@@ -342,6 +349,13 @@ $.fn.dropdown = function(parameters) {
                 ? module.get.value()
                 : module.get.text()
             ;
+            if(strict === undefined && value === '') {
+              module.debug('Ambiguous dropdown value using strict type check', value);
+              strict = true;
+            }
+            else {
+              strict = strict || false;
+            }
             if(value !== undefined) {
               $item
                 .each(function() {
@@ -352,13 +366,25 @@ $.fn.dropdown = function(parameters) {
                       : $choice.text(),
                     optionValue   = ( $choice.data(metadata.value) !== undefined )
                       ? $choice.data(metadata.value)
-                      : optionText.toLowerCase()
+                      : (typeof optionText === 'string')
+                        ? optionText.toLowerCase()
+                        : optionText
                   ;
-                  if( optionValue == value ) {
-                    $selectedItem = $(this);
+                  if(strict) {
+                    if( optionValue === value ) {
+                      $selectedItem = $(this);
+                    }
+                    else if( !$selectedItem && optionText === value ) {
+                      $selectedItem = $(this);
+                    }
                   }
-                  else if( !$selectedItem && optionText == value ) {
-                    $selectedItem = $(this);
+                  else {
+                    if( optionValue == value ) {
+                      $selectedItem = $(this);
+                    }
+                    else if( !$selectedItem && optionText == value ) {
+                      $selectedItem = $(this);
+                    }
                   }
                 })
               ;
@@ -416,7 +442,10 @@ $.fn.dropdown = function(parameters) {
           value: function(value) {
             module.debug('Adding selected value to hidden input', value, $input);
             if($input.size() > 0) {
-              $input.val(value);
+              $input
+                .val(value)
+                .trigger('change')
+              ;
             }
             else {
               $module.data(metadata.value, value);
@@ -830,7 +859,7 @@ $.fn.dropdown = function(parameters) {
     })
   ;
 
-  return (returnedValue)
+  return (returnedValue !== undefined)
     ? returnedValue
     : this
   ;
@@ -841,8 +870,8 @@ $.fn.dropdown.settings = {
   name        : 'Dropdown',
   namespace   : 'dropdown',
 
+  debug       : false,
   verbose     : true,
-  debug       : true,
   performance : true,
 
   on          : 'click',
@@ -875,10 +904,11 @@ $.fn.dropdown.settings = {
   },
 
   selector : {
-    menu  : '.menu',
-    item  : '.menu > .item',
-    text  : '> .text',
-    input : '> input[type="hidden"]'
+    menu    : '.menu',
+    submenu : '> .menu',
+    item    : '.menu > .item',
+    text    : '> .text',
+    input   : '> input[type="hidden"]'
   },
 
   className : {
