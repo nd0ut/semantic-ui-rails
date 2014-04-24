@@ -7,10 +7,10 @@ require 'json'
 class Semantic < Thor
   include Thor::Actions
 
-  REPO_URI = "https://github.com/jlukic/Semantic-UI.git"
+  REPO_URI = "https://github.com/Semantic-Org/Semantic-UI.git"
 
   desc "update", "fetch Semantic UI code from git"
-  method_option :branch, default: "master"
+  method_option :branch, default: "css"
 
   def update
     if File.directory? working_dir
