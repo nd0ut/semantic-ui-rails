@@ -5,6 +5,9 @@ Semantic empowers designers and developers by creating a language for sharing UI
 
 Homepage: http://semantic-ui.com/
 
+## SASS
+Please use the [semantic-ui-sass](https://github.com/doabit/semantic-ui-sass) gem.
+
 ## Installation
 Inside your Gemfile add the following lines:
 ```ruby
