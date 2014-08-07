@@ -1,3 +1,5 @@
+# CAUTION: This gem is no longer maintained!
+
 # Semantic UI
 UI is the vocabulary of the web.
 
